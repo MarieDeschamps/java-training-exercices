@@ -20,7 +20,7 @@ public interface IGenerationThreshold {
     
     float calculateProbabilityOfSame(int size);
 
-    int findSmallestNumberOfPeopleRequiredToHave50();
+    int findSmallestNumberOfPeopleRequiredToHave50() throws Exception;
 
 
 }
