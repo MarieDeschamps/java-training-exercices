@@ -18,7 +18,7 @@ public class HandValue implements Comparable<HandValue>{
 	 * the straight 4-5-6-7-8 has a 8 value
 	 * T-J-Q-K-A has 14  value !!!  
 	 */
-	int levelValue;
+	int levelValue = 0;
 	
 	//Needed with two pairs or full
 	int secondLevel = 0;

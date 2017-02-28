@@ -23,7 +23,7 @@ public class Deck extends LinkedList<Card> implements IDeck{
 		int size = this.size();
 		Random random = new Random();
 		int cardNumber = random.nextInt(size);
-		Card pickedCard = this.get(cardNumber-1);
+		Card pickedCard = this.get(cardNumber);
 		this.remove(pickedCard);
 		
 		return pickedCard;
@@ -49,6 +49,12 @@ public class Deck extends LinkedList<Card> implements IDeck{
 		return hand;
 	}
 	
+	public HandHoldem giveHandHoldem() {
+		HandHoldem handHoldem = new HandHoldem();
+		handHoldem.addAll(this.pick(7));
+		
+		return handHoldem;
+	}
 	
 	
 }

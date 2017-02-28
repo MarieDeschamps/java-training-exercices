@@ -14,8 +14,9 @@ import io.robusta.hand.HandClassifier;
 import io.robusta.hand.PokerTest;
 import io.robusta.hand.solution.DeckGenerator;
 import io.robusta.hand.solution.Hand;
+import io.robusta.hand.solution.HandHoldem;
 
-public class IHandTest extends PokerTest {
+public class IHandTestHoldem extends PokerTest {
 
 	
 	IDeck deck;
@@ -31,18 +32,18 @@ public class IHandTest extends PokerTest {
 	}
 
 	public IHand newHand(String cards) {
-		Hand h = new Hand();
+		HandHoldem h = new HandHoldem();
 		h.addAll(generateCards(cards));
 		return h;
 	}
 
 	public IHand randomHand(String cards) {
-		return deck.giveHand();
+		return deck.giveHandHoldem();
 	}
 
 	@Test
 	public void testChangeCards() {
-		Hand h = deck.giveHand();
+		HandHoldem h = deck.giveHandHoldem();
 		Set<Card> cards;
 		
 		cards = h.changeCards(deck, new TreeSet<>());
@@ -84,25 +85,26 @@ public class IHandTest extends PokerTest {
 
 	@Test
 	public void testIsStraight() {
-		IHand hand = newHand("4c 5c 2s 3s 6h");
+		IHand hand = newHand("4c 5c 2s 3s 6h 6d As");
 		assertTrue(hand.toString(), hand.isStraight());		
 	}
 	
 	@Test
 	public void testIsStraightWithAce() {
 		
-		IHand hand = newHand("4c 5c 2s 3s Ah");
+		IHand hand = newHand("4c 5c 2s 3s Ah Qh Qd");
+		hand.isStraight();
 		assertTrue(hand.toString(), hand.isStraight());
 		
-		hand = newHand("Tc Jc As Qs Kh");
+		hand = newHand("Tc Jc As Qs Kh 2s Qd");
 		assertTrue(hand.toString(), hand.isStraight());
 	}
 
 	@Test
 	public void testIsFlush() {
-		IHand hand = newHand("4c 5c 2c 3c Qc");
+		IHand hand = newHand("4c 5c 2d 3c Qc Kc Tc");
 		assertTrue(hand.toString(), hand.isFlush());
-		hand = newHand("4c 5c 2c 3c Qs");
+		hand = newHand("4c 5c 2c 3c Qs Kd Ah");
 		assertFalse(hand.toString(), hand.isFlush());
 	}
 	

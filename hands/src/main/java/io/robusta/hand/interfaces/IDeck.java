@@ -5,6 +5,7 @@ import java.util.TreeSet;
 
 import io.robusta.hand.Card;
 import io.robusta.hand.solution.Hand;
+import io.robusta.hand.solution.HandHoldem;
 
 public interface IDeck extends Collection<Card>{
 
@@ -30,5 +31,7 @@ public interface IDeck extends Collection<Card>{
 	 * @return current size of the deck
 	 */
 	public int size();
+
+	public HandHoldem giveHandHoldem();
 
 }

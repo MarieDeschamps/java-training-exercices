@@ -18,59 +18,13 @@ import io.robusta.hand.interfaces.IDeck;
 import io.robusta.hand.interfaces.IHand;
 import io.robusta.hand.interfaces.IHandResolver;
 
-public class Hand extends TreeSet<Card> implements IHand {
+public class HandHoldem extends Hand {
 
 	private static final long serialVersionUID = 7824823998655881611L;
 
 	@Override
-	public Set<Card> changeCards(IDeck deck, Set<Card> cards) {
-		// For exemple remove three cards from this hand
-		// , and get 3 new ones from the Deck
-		// returns the new given cards
-		Set<Card> finalCards = new TreeSet<>(this);
-		
-		if(cards !=null && cards.size()!=0){
-			for(Card c : cards){
-				finalCards.remove(c);
-			}
-			for(int i = 0; i<cards.size(); i++){
-				finalCards.add(deck.pick());
-			}
-		}
-
-		return finalCards;
-	}
-
-	@Override
 	public boolean beats(IHand villain) {
-		return this.getValue().compareTo(villain.getValue())>0;
-	}
-
-	@Override
-	public IHand getHand() {
-		return this;
-	}
-
-	@Override
-	public HandClassifier getClassifier() {
-		if (this.isStraightFlush()) {
-			return HandClassifier.STRAIGHT_FLUSH;
-		} else if (this.isFourOfAKind()) {
-			return HandClassifier.FOUR_OF_A_KIND;
-		} else if (this.isFull()) {
-			return HandClassifier.FULL;
-		} else if (this.isFlushOrMore()) {
-			return HandClassifier.FLUSH;
-		} else if (this.isStraightOrMore()) {
-			return HandClassifier.STRAIGHT;
-		} else if (this.isTripsOrMore()) {
-			return HandClassifier.TRIPS;
-		} else if (this.isDoublePairOrMore()) {
-			return HandClassifier.TWO_PAIR;
-		} else if (this.isPairOrMore()) {
-			return HandClassifier.PAIR;
-		}
-		return HandClassifier.HIGH_CARD;
+		return this.getValue().compareTo(villain.getValue()) > 0;
 	}
 
 	@Override
@@ -82,18 +36,42 @@ public class Hand extends TreeSet<Card> implements IHand {
 	}
 
 	private boolean isStraightOrMore() {
-		List<Card> cards = new ArrayList<>(this);
+		HashMap<Integer, List<Card>> map = group();
+		List<Integer> cards = new ArrayList<>();
+		Iterator<Entry<Integer, List<Card>>> it = map.entrySet().iterator();
+		while (it.hasNext()) {
+			cards.add(it.next().getKey());
+		}
+		int followNumber = 1;
+		boolean result = false;
+		boolean maybeAceSuit = (cards.get(0) == 2);
+		boolean reachFour = false;
 		for (int nbC = 1; nbC < cards.size(); nbC++) {
-			if (cards.get(nbC).getValue() != cards.get(nbC-1).getValue() + 1) {
-				boolean testAce = (nbC == cards.size()-1) && (cards.get(nbC).getValue() == 14) && (cards.get(0).getValue() == 2);
-				if(!testAce){
-					return false;
+			if (cards.get(nbC) == cards.get(nbC - 1) + 1) {
+				followNumber++;
+				if (followNumber == 4) {
+					reachFour = true;
+				}
+				if (followNumber >= 5) {
+					mainValue = cards.get(nbC);
+					result = true;
+				}
+			} else {
+				boolean testAce = (nbC == cards.size() - 1) && (cards.get(nbC) == 14) && maybeAceSuit;
+				if (testAce) {
+					mainValue = cards.get(nbC);
+					result = true;
+				} else {
+					if (!reachFour) {
+						maybeAceSuit = false;
+					}
+					followNumber = 1;
 				}
 			}
+
 		}
-		mainValue = this.last().getValue();
 		remainings = new TreeSet<>();
-		return true;
+		return result;
 	}
 
 	@Override
@@ -105,21 +83,21 @@ public class Hand extends TreeSet<Card> implements IHand {
 	}
 
 	private boolean isFlushOrMore() {
-		CardColor color = null;
-		boolean colorSet = false;
+		int[] colorNb = {0, 0, 0, 0};
+
 		for (Card c : this) {
-			if (!colorSet) {
-				color = c.getColor();
-				colorSet = true;
-			}
-			if (c.getColor().getValue() != color.getValue()) {
-				return false;
+			(colorNb[c.getColor() .getValue()-1]) ++;
+		}
+		for(int i : colorNb){
+			if(i>=5){
+				mainValue = this.last().getValue();
+				remainings = new TreeSet<>(this);
+				remainings.remove(this.last());
+				return true;
 			}
 		}
-		mainValue = this.last().getValue();
-		remainings = new TreeSet<>(this);
-		remainings.remove(this.last());
-		return true;
+		
+		return false;
 	}
 
 	/**
@@ -159,8 +137,8 @@ public class Hand extends TreeSet<Card> implements IHand {
 
 	// different states of the hand
 	int mainValue;
-//	int tripsValue;
-//	int pairValue;
+	// int tripsValue;
+	// int pairValue;
 	int secondValue;
 	TreeSet<Card> remainings;
 
@@ -219,10 +197,10 @@ public class Hand extends TreeSet<Card> implements IHand {
 		for (int i = 1; i <= 13; i++) {
 			if (this.number(i) == 2) {
 				pairNumber++;
-				if(i>mainValue){
+				if (i > mainValue) {
 					secondValue = mainValue;
 					mainValue = i;
-				}else{
+				} else {
 					secondValue = i;
 				}
 				completeRemainings(map, i);
@@ -236,8 +214,8 @@ public class Hand extends TreeSet<Card> implements IHand {
 		if (!this.isPair() && !this.isDoublePair() && !this.isTrips() && !this.isStraight() && !this.isFlush()
 				&& !this.isFull() && !this.isFourOfAKind() && !this.isStraightFlush()) {
 			mainValue = 0;
-			for(Card c : this){
-				if(c.getValue()>mainValue){
+			for (Card c : this) {
+				if (c.getValue() > mainValue) {
 					mainValue = c.getValue();
 				}
 			}
@@ -301,7 +279,7 @@ public class Hand extends TreeSet<Card> implements IHand {
 				Entry<Integer, List<Card>> mapLine = it.next();
 				if (mapLine.getValue().size() == 3) {
 					mainValue = mapLine.getKey();
-				}else{
+				} else {
 					secondValue = mapLine.getKey();
 				}
 				remainings = new TreeSet<>();
@@ -314,7 +292,7 @@ public class Hand extends TreeSet<Card> implements IHand {
 
 	@Override
 	public boolean isStraightFlush() {
-		if(this.isStraightOrMore() && this.isFlushOrMore()){
+		if (this.isStraightOrMore() && this.isFlushOrMore()) {
 			mainValue = this.last().getValue();
 			remainings = new TreeSet<>();
 			return true;
@@ -330,7 +308,7 @@ public class Hand extends TreeSet<Card> implements IHand {
 		handValue.setLevelValue(this.mainValue);
 		handValue.setOtherCards(this.remainings); // or this.getRemainings()
 		return handValue;
-		
+
 	}
 
 	@Override
@@ -362,23 +340,23 @@ public class Hand extends TreeSet<Card> implements IHand {
 	public int compareTo(IHandResolver o) {
 		return this.getValue().compareTo(o.getValue());
 	}
-	
+
 	private void completeRemainings(HashMap<Integer, List<Card>> map, int i) {
 		Iterator<Entry<Integer, List<Card>>> it = map.entrySet().iterator();
 		remainings = new TreeSet<>(this);
 		while (it.hasNext()) {
 			Entry<Integer, List<Card>> mapLine = it.next();
-			if (mapLine.getKey()==i) {
-				for(Card c : mapLine.getValue()){
+			if (mapLine.getKey() == i) {
+				for (Card c : mapLine.getValue()) {
 					remainings.remove(c);
 				}
 			}
 		}
 	}
-	
+
 	private void completeRemainings(Entry<Integer, List<Card>> mapLine) {
 		remainings = new TreeSet<>(this);
-		for(Card c : mapLine.getValue()){
+		for (Card c : mapLine.getValue()) {
 			remainings.remove(c);
 		}
 	}
