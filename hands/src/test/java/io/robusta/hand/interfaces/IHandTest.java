@@ -91,6 +91,8 @@ public class IHandTest extends PokerTest {
 	public void testIsFlush() {
 		IHand hand = newHand("4c 5c 2c 3c Qc");
 		assertTrue(hand.toString(), hand.isFlush());
+		hand = newHand("4c 5c 2c 3c Qs");
+		assertFalse(hand.toString(), hand.isFlush());
 	}
 	
 	
@@ -113,6 +115,7 @@ public class IHandTest extends PokerTest {
 	@Test
 	public void testStraightFlush() {
 		IHand hand = newHand("2c 3c 4c 5c 6c");
+		System.out.println(hand.isStraightFlush());
 		assertTrue(hand.getClassifier() == HandClassifier.STRAIGHT_FLUSH);
 	}
 	

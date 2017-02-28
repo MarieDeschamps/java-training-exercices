@@ -3,6 +3,7 @@ package io.robusta.hand;
 public enum CardColor {
 
 	SPADE('s', 1), HEART('h', 2), DIAMOND('d', 3), CLUB('c', 4);
+	//pique, coeur, carreau, trefle
 	
 	char abbr;
 	int value;
